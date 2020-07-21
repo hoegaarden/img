@@ -1,0 +1,54 @@
+[diff]
+  compactionHeuristic = true
+  algorithm = histogram
+[push]
+  recurseSubmodules = on-demand
+[alias]
+  st = status
+  di = diff
+  co = checkout
+  ci = commit --verbose
+  dca = commit --amend --reset-author --verbose
+  br = branch
+  sta = stash
+  llog = log --date=local
+  flog = log --pretty=fuller --decorate
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+  lol = log --graph --decorate --oneline
+  lola = log --format='%C(auto)%h |%<(11,trunc)%an|%d %s' --graph --decorate --all
+  blog = log origin/master... --left-right
+  ds = diff --staged
+  fixup = commit --fixup
+  squash = commit --squash
+  unstage = reset HEAD
+  rum = rebase master@{u}
+  hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+  forget = rm --cached
+  pullsubs = submodule update --init --recursive
+  please = push --force-with-lease
+[color]
+  branch = auto
+  diff = auto
+  interactive = auto
+  status = auto
+  ui = auto
+[merge]
+  conflictstyle = diff3
+[pull]
+  rebase = true
+[push]
+  default = current
+[commit]
+  verbose = true
+[http "https://gopkg.in"]
+  followRedirects = true
+[log]
+  date = iso-local
+
+[pager]
+  log = diff-highlight
+  show = diff-highlight
+  diff = diff-highlight
+
+[interactive]
+  diffFilter = diff-highlight

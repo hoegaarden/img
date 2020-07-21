@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+readonly DH_DIR='/usr/share/doc/git/contrib/diff-highlight'
+
+main() {
+  exec perl \
+    <( cat "${DH_DIR}/DiffHighlight.pm" "${DH_DIR}/diff-highlight.perl" ) \
+    | "${PAGER:-less}"
+}
+
+main
