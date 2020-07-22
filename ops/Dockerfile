@@ -37,29 +37,33 @@ RUN \
     cf-uaac
 
 
-ARG CF_URL=https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7
-ARG KUBECTL_VER_URL=https://storage.googleapis.com/kubernetes-release/release/stable.txt
-ARG KUBECTL_BIN_URL=https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl
 RUN \
+    CF_URL='https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7' ; \
+    KUBECTL_VER_URL='https://storage.googleapis.com/kubernetes-release/release/stable.txt' ; \
+    KUBECTL_BIN_URL='https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl' ; \
     latest() { \
-      local slug="$1" ; \
-      local re="$2" ; \
-      curl -fsSL "https://api.github.com/repos/${slug}/releases/latest" \
-        | jq --arg re "$re" -r '[ .assets[] | select(.name|test($re)) | .browser_download_url ][0]' ; \
+      curl -fsSL "https://api.github.com/repos/${1}/releases/latest" \
+        | jq --arg re "${2}" -r '[ .assets[] | select(.name|test($re)) | .browser_download_url ][0]' ; \
+    } ; \
+    inst() { \
+      install -m 0755 "$2" "${BIN}/${1}" \
+        && echo -n "$1 installed: " \
+        && { "$1" version || "$1" --version || true ; } 2>/dev/null | sed '/^$/d' | head -1 ; \
     } \
-  && echo bosh      && install -m 0755 <(curl -Lf# "$(latest cloudfoundry/bosh-cli              linux-amd64)")                                 "${BIN}/bosh" \
-  && echo om        && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/om                      linux)")                                       "${BIN}/om" \
-  && echo cf        && install -m 0755 <(curl -Lf# "${CF_URL}" | tar -O -zxf - cf7)                                                            "${BIN}/cf" \
-  && echo uaa       && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/uaa-cli     linux-amd64)")                                 "${BIN}/uaa" \
-  && echo credhub   && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli linux)" | tar -O -zx ./credhub)                "${BIN}/credhub" \
-  && echo pivnet    && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/pivnet-cli              linux-amd64)")                                 "${BIN}/pivnet" \
-  && echo fly       && install -m 0755 <(curl -Lf# "$(latest concourse/concourse                'fly.*linux-amd64.tgz')" | tar -O -zx fly)     "${BIN}/fly" \
-  && echo kustomize && install -m 0755 <(curl -Lf# "$(latest kubernetes-sigs/kustomize          'linux_amd64.tar.gz')" | tar -O -zx kustomize) "${BIN}/kustomize" \
-  && echo kubectl   && install -m 0755 <(curl -Lf# "$(printf "${KUBECTL_BIN_URL}" "$( curl -Lf# "${KUBECTL_VER_URL}" )" )")                    "${BIN}/kubectl"
+  && inst bosh      <(curl -Lf# "$(latest cloudfoundry/bosh-cli              'linux-amd64')") \
+  && inst cf        <(curl -Lf# "${CF_URL}" | tar -O -zxf - cf7) \
+  && inst credhub   <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli linux)" | tar -O -zx ./credhub) \
+  && inst fly       <(curl -Lf# "$(latest concourse/concourse                'fly.*linux-amd64.tgz')" | tar -O -zx fly) \
+  && inst kubectl   <(curl -Lf# "$(printf "${KUBECTL_BIN_URL}" "$( curl -Lf# "${KUBECTL_VER_URL}" )" )") \
+  && inst kustomize <(curl -Lf# "$(latest kubernetes-sigs/kustomize          'linux_amd64.tar.gz')" | tar -O -zx kustomize) \
+  && inst om        <(curl -Lf# "$(latest pivotal-cf/om                      'linux')") \
+  && inst pivnet    <(curl -Lf# "$(latest pivotal-cf/pivnet-cli              'linux-amd64')") \
+  && inst uaa       <(curl -Lf# "$(latest cloudfoundry-incubator/uaa-cli     'linux-amd64')")
 
 
-ARG GIMME_URL=https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-RUN install -m 0755 <(curl -Lf# "${GIMME_URL}") "${BIN}/gimme"
+RUN \
+    GIMME_URL='https://raw.githubusercontent.com/travis-ci/gimme/master/gimme' \
+  && install -m 0755 <(curl -Lf# "${GIMME_URL}") "${BIN}/gimme"
 
 ARG OPS_USER=ops
 ARG OPS_HOME=/workspace
@@ -77,9 +81,10 @@ RUN \
     git config --global user.name "${REAL_NAME}" \
   && git config --global user.email "${REAL_EMAIL}"
 
-ARG LUAN_VIM_GIT=https://github.com/luan/vimfiles
+
 RUN \
-    git clone "${LUAN_VIM_GIT}" .vim \
+    LUAN_VIM_GIT='https://github.com/luan/vimfiles' \
+  && git clone "${LUAN_VIM_GIT}" .vim \
   && cd .vim \
   && npm() { sudo "$(which npm)" "$@" ; } \
   && export -f npm \
