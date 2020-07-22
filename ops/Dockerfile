@@ -38,6 +38,8 @@ RUN \
 
 
 ARG CF_URL=https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7
+ARG KUBECTL_VER_URL=https://storage.googleapis.com/kubernetes-release/release/stable.txt
+ARG KUBECTL_BIN_URL=https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl
 RUN \
     latest() { \
       local slug="$1" ; \
@@ -45,13 +47,15 @@ RUN \
       curl -fsSL "https://api.github.com/repos/${slug}/releases/latest" \
         | jq --arg re "$re" -r '[ .assets[] | select(.name|test($re)) | .browser_download_url ][0]' ; \
     } \
-  && echo bosh    && install -m 0755 <(curl -Lf# "$(latest cloudfoundry/bosh-cli              linux-amd64)")                             "${BIN}/bosh" \
-  && echo om      && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/om                      linux)")                                   "${BIN}/om" \
-  && echo cf      && install -m 0755 <(curl -Lf# "${CF_URL}" | tar -O -zxf - cf7)                                                        "${BIN}/cf" \
-  && echo uaa     && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/uaa-cli     linux-amd64)")                             "${BIN}/uaa" \
-  && echo credhub && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli linux)" | tar -O -zx ./credhub)            "${BIN}/credhub" \
-  && echo pivnet  && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/pivnet-cli              linux-amd64)")                             "${BIN}/pivnet" \
-  && echo fly     && install -m 0755 <(curl -Lf# "$(latest concourse/concourse                'fly.*linux-amd64.tgz')" | tar -O -zx fly) "${BIN}/fly"
+  && echo bosh      && install -m 0755 <(curl -Lf# "$(latest cloudfoundry/bosh-cli              linux-amd64)")                                 "${BIN}/bosh" \
+  && echo om        && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/om                      linux)")                                       "${BIN}/om" \
+  && echo cf        && install -m 0755 <(curl -Lf# "${CF_URL}" | tar -O -zxf - cf7)                                                            "${BIN}/cf" \
+  && echo uaa       && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/uaa-cli     linux-amd64)")                                 "${BIN}/uaa" \
+  && echo credhub   && install -m 0755 <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli linux)" | tar -O -zx ./credhub)                "${BIN}/credhub" \
+  && echo pivnet    && install -m 0755 <(curl -Lf# "$(latest pivotal-cf/pivnet-cli              linux-amd64)")                                 "${BIN}/pivnet" \
+  && echo fly       && install -m 0755 <(curl -Lf# "$(latest concourse/concourse                'fly.*linux-amd64.tgz')" | tar -O -zx fly)     "${BIN}/fly" \
+  && echo kustomize && install -m 0755 <(curl -Lf# "$(latest kubernetes-sigs/kustomize          'linux_amd64.tar.gz')" | tar -O -zx kustomize) "${BIN}/kustomize" \
+  && echo kubectl   && install -m 0755 <(curl -Lf# "$(printf "${KUBECTL_BIN_URL}" "$( curl -Lf# "${KUBECTL_VER_URL}" )" )")                    "${BIN}/kubectl"
 
 
 ARG GIMME_URL=https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
