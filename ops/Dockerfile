@@ -1,4 +1,4 @@
-ARG BASE_IMAGE='debian:sid'
+ARG BASE_IMAGE='debian'
 FROM "${BASE_IMAGE}" AS layered
 
 LABEL maintainer='Hannes Hörl <horlh@vmware.com>'
@@ -31,7 +31,7 @@ RUN \
     wget \
   && apt autopurge -y && apt autoclean -y \
   && rm -rf /var/lib/apt/lists/* \
-  && pip install --no-cache-dir \
+  && pip3 install --no-cache-dir \
     yq \
   && gem install -q --no-document \
     cf-uaac
