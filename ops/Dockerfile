@@ -42,8 +42,8 @@ RUN \
     KUBECTL_VER_URL='https://storage.googleapis.com/kubernetes-release/release/stable.txt' ; \
     KUBECTL_BIN_URL='https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl' ; \
     latest() { \
-      curl -fsSL "https://api.github.com/repos/${1}/releases/latest" \
-        | jq --arg re "${2}" -r '[ .assets[] | select(.name|test($re)) | .browser_download_url ][0]' ; \
+      curl -fsSL "https://api.github.com/repos/${1}/releases?pages=3" \
+        | jq --arg re "${2}" -r '[ .[].assets[] | select(.name|test($re)) | .browser_download_url ][0]' ; \
     } ; \
     inst() { \
       install -m 0755 "$2" "${BIN}/${1}" \
@@ -52,7 +52,7 @@ RUN \
     } \
   && inst bosh      <(curl -Lf# "$(latest cloudfoundry/bosh-cli              'linux-amd64')") \
   && inst cf        <(curl -Lf# "${CF_URL}" | tar -O -zxf - cf7) \
-  && inst credhub   <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli linux)" | tar -O -zx ./credhub) \
+  && inst credhub   <(curl -Lf# "$(latest cloudfoundry-incubator/credhub-cli 'linux')" | tar -O -zx ./credhub) \
   && inst fly       <(curl -Lf# "$(latest concourse/concourse                'fly.*linux-amd64.tgz')" | tar -O -zx fly) \
   && inst kubectl   <(curl -Lf# "$(printf "${KUBECTL_BIN_URL}" "$( curl -Lf# "${KUBECTL_VER_URL}" )" )") \
   && inst kustomize <(curl -Lf# "$(latest kubernetes-sigs/kustomize          'linux_amd64.tar.gz')" | tar -O -zx kustomize) \
